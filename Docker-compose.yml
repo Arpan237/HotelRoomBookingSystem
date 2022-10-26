@@ -1,0 +1,100 @@
+version: '3.3'
+# Define services
+services:
+usersvc:
+# Configuration for building the docker image for the user service
+build: user-Eureka
+container_name: usersvc
+image: movieapp/usersvc:1.0.0
+ports:
+  - "8082:8082" # Forward the exposed port 8082 to port 8082 on the host machine
+networks:
+  - microservicesnet
+environment:
+MYSQL_HOST: database
+EUREKA_HOST_NAME: 3.236.249.212
+depends_on:
+  - database # This service depends on mysql. Start that first.
+  - serviceregistry # This service depends on serviceregistry. Start that first.
+  - configserver # This service depends on configserver. Start that first.
+bookingsvc:
+build: hotelbookingapp-ApiGateway
+container_name: bookingsvc
+image: hotelbookingapp/moviesvc:1.0.0
+ports:
+  - "8081:8081" # Map the exposed port 8081 on container to port 8081 on the host machine
+networks:
+  - microservicesnet
+environment:
+MYSQL_HOST: database
+EUREKA_HOST_NAME: 3.236.249.212
+depends_on:
+  - database # This service depends on mysql. Start that first.
+  - serviceregistry # This service depends on serviceregistry. Start that first.
+  - configserver # This service depends on configserver. Start that first.
+notificationsvc:
+build: hotelbookingapp-Eureka
+container_name: notificationsvc
+image: hotelbookingapp/notificationsvc:1.0.0
+ports:
+  - "8083:8083" # Map the exposed port 8083 on container to port 8083 on the host machine
+networks:
+  - microservicesnet
+environment:
+MYSQL_HOST: database
+EUREKA_HOST_NAME: 3.236.249.212
+depends_on:
+  - database # This service depends on mysql. Start that first.
+  - serviceregistry # This service depends on serviceregistry. Start that first.
+  - configserver # This service depends on configserver. Start that first.
+configserver:
+build: Config-Server-master
+container_name: configserver
+image: hotelbookingapp/configserver:1.0.0
+ports:
+  - "8888:8888" # Map the exposed port 8888 on container to port 8888 on the host machine
+networks:
+  - microservicesnet
+environment:
+MYSQL_HOST: database
+EUREKA_HOST_NAME: 3.236.249.212
+apigateway:
+build: api-gateway-master
+container_name: apigateway
+image: hotelbookingapp/apigateway:1.0.0
+ports:
+  - "9191:9191" # Map the exposed port 9191 on container to port 9191 on the host machine
+networks:
+  - microservicesnet
+environment:
+MYSQL_HOST: database
+EUREKA_HOST_NAME: 3.236.249.212
+depends_on:
+  - serviceregistry # This service depends on mysql. Start that first.
+serviceregistry:
+build: service_registry
+container_name: serviceregistry
+image: hotelbookingapp/serviceregistry:1.0.0
+ports:
+  - "8761:8761" # Map the exposed port 8761 on container to port 8761 on the host machine
+networks:
+  - microservicesnet
+environment:
+MYSQL_HOST: database
+EUREKA_HOST_NAME: 3.236.249.212
+database:
+image: mysql:8.0
+container_name: database
+ports:
+  - "3306:3306"
+networks:
+  - microservicesnet
+environment:
+MYSQL_DATABASE: upgradpg
+MYSQL_USER: upgradpg
+MYSQL_PASSWORD: upgradpg
+MYSQL_ROOT_PASSWORD: password
+networks:
+microservicesnet:
+  © Copyright 2021 upGrad Education Pvt. Ltd. All rights reserved
+driver: bridge
